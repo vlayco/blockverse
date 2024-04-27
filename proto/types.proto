@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "github.com/vlayco/blockverse/proto";
+
+message Block {
+  Header header = 1;
+  repeated Transaction transactions = 2;
+}
+
+message Header {
+  int32 version = 1; // version of block / serialization protocol
+  int32 height = 2; // number of blocks
+  bytes prevHash = 3; // hash of the previous block
+  bytes rootHash = 4; // the Merkle root of Tx's
+  int64 timestamp = 5; // timestamp of when the block is created
+}
+
+message Transaction {
+
+}
