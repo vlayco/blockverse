@@ -8,13 +8,35 @@ message Block {
 }
 
 message Header {
-  int32 version = 1; // version of block / serialization protocol
-  int32 height = 2; // number of blocks
-  bytes prevHash = 3; // hash of the previous block
-  bytes rootHash = 4; // the Merkle root of Tx's
-  int64 timestamp = 5; // timestamp of when the block is created
+  int32 version = 1; // version of block/serialization protocol.
+  int32 height = 2; // number of blocks.
+  bytes prevHash = 3; // hash of the previous block.
+  bytes rootHash = 4; // the Merkle root of Tx's.
+  int64 timestamp = 5; // timestamp of when the block is created.
 }
 
-message Transaction {
+message TxInput {
+  // The previous hash of the transaction containing the output we want to spend.
+  bytes prevTxHash = 1;
+  // The index of the output of the previous transaction we want to spend.
+  uint32 prevOutIndex = 2;
+  // Public key.
+  bytes publicKey = 3;
+  // Signature based on the private key.
+  bytes signature = 4;
 
+}
+
+message TxOutput {
+  // The amount.
+  int64 amount = 1;
+  // Address of to whom we want to send it.
+  bytes address = 2;
+}
+
+// Simply put: Txs consists of inputs and outputs.
+message Transaction {
+  int32 version = 1;
+  repeated TxInput inputs = 2;
+  repeated TxOutput outputs = 3;
 }
