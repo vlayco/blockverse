@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/vlayco/blockverse/proto"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/peer"
@@ -15,6 +16,7 @@ import (
 type Node struct {
 	version    string
 	listenAddr string
+	logger     *zap.SugaredLogger
 	// When we handle the transaction we want to broadcast it to all the peers on
 	// the network.
 	peerLock sync.RWMutex
@@ -24,9 +26,17 @@ type Node struct {
 }
 
 func NewNode() *Node {
+	// loggerConfig := zap.NewProductionConfig()
+	loggerConfig := zap.NewDevelopmentConfig()
+	// loggerConfig.EncoderConfig.TimeKey = "timestamp"
+	loggerConfig.EncoderConfig.TimeKey = ""
+	loggerConfig.Level.SetLevel(zap.DebugLevel)
+	// loggerConfig.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(time.RFC3339)
+	logger, _ := loggerConfig.Build()
 	return &Node{
 		peers:   make(map[proto.NodeClient]*proto.Version),
 		version: "blockverse-1",
+		logger:  logger.Sugar(),
 	}
 }
 
@@ -34,7 +44,9 @@ func (n *Node) addPeer(c proto.NodeClient, v *proto.Version) {
 	n.peerLock.Lock()
 	defer n.peerLock.Unlock()
 
-	fmt.Printf("[%s] new peer connected (%s) - height (%d)\n", n.listenAddr, v.ListenAddr, v.Height)
+	// fmt.Printf("[%s] new peer connected (%s) - height (%d)\n", n.listenAddr, v.ListenAddr, v.Height)
+
+	n.logger.Debugw("new peer connected", "addr", v.ListenAddr, "height", v.Height)
 
 	n.peers[c] = v
 }
@@ -60,7 +72,8 @@ func (n *Node) Start(listenAddr string) error {
 	}
 	proto.RegisterNodeServer(grpcServer, n)
 
-	fmt.Printf("node running on port: %s\n", listenAddr)
+	// fmt.Printf("node running on port: %s\n", listenAddr)
+	n.logger.Infow("node started...", "port", n.listenAddr)
 
 	// go n.bootstrapNetwork()
 
@@ -76,7 +89,7 @@ func (n *Node) BootstrapNetwork(addrs []string) error {
 
 		v, err := c.Handshake(context.Background(), n.getVersion())
 		if err != nil {
-			fmt.Println("handshake error: ", err)
+			n.logger.Errorf("handshake error: ", err)
 			continue
 		}
 
