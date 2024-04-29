@@ -36,7 +36,7 @@ func TestNewTransaction(t *testing.T) {
 	// Output specifies a destination, where we are going to spend the coins at.
 	// This is sending part, with the amount we want to spend.
 	// In this hypotetic scenarion lets say that we have 100 of some coins, and
-	// we want to send 5 (to some address). But the we also need to spend rest\
+	// we want to send 5 (to some address). But the we also need to spend rest
 	// of the coins we have, 95.
 	output1 := &proto.TxOutput{
 		Amount:  5,

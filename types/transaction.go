@@ -29,7 +29,7 @@ func VerifyTransaction(tx *proto.Transaction) bool {
 			pubKey = crypto.PublicKeyFromBytes(input.PublicKey)
 		)
 		// This is because before signing transaction we don't have the signature!
-		// TODO: make shure we don't run into problems after verification because
+		// TODO: make sure we don't run into problems after verification because
 		// we've set the signature to nil!
 		input.Signature = nil
 		if !sig.Verify(pubKey, HashTransaction(tx)) {

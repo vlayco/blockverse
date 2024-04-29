@@ -2,6 +2,18 @@ syntax = "proto3";
 
 option go_package = "github.com/vlayco/blockverse/proto";
 
+service Node {
+  rpc Handshake(Version) returns (Version);
+  rpc HandleTransaction(Transaction) returns (Ack);
+}
+
+message Version {
+  string version = 1;
+  int32 height = 2;
+}
+
+message Ack {}
+
 message Block {
   Header header = 1;
   repeated Transaction transactions = 2;
@@ -34,7 +46,7 @@ message TxOutput {
   bytes address = 2;
 }
 
-// Simply put: Txs consists of inputs and outputs.
+// Simply put: Txs consist of inputs and outputs.
 message Transaction {
   int32 version = 1;
   repeated TxInput inputs = 2;
