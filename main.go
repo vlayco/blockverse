@@ -2,10 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"net"
-	"time"
 
 	"github.com/vlayco/blockverse/node"
 	"github.com/vlayco/blockverse/proto"
@@ -14,25 +11,29 @@ import (
 )
 
 func main() {
-	node := node.NewNode()
-	opts := []grpc.ServerOption{}
-	grpcServer := grpc.NewServer(opts...)
-	ln, err := net.Listen("tcp", ":3000")
-	if err != nil {
-		log.Fatal(err)
-	}
-	proto.RegisterNodeServer(grpcServer, node)
-	fmt.Println("node running on port: ", ":3000")
+	makeNode(":3000", []string{})
+	makeNode(":4000", []string{":3000"})
 
-	go func() {
-		for {
-			time.Sleep(time.Second * 2)
-			makeTransaction()
+	// go func() {
+	// 	for {
+	// 		time.Sleep(time.Second * 2)
+	// 		makeTransaction()
+	// 	}
+	// }()
+
+	// log.Fatal(node.Start(":3000"))
+	select {}
+}
+
+func makeNode(listenAddr string, bootstrapNodes []string) *node.Node {
+	n := node.NewNode()
+	go n.Start(listenAddr)
+	if len(bootstrapNodes) > 0 {
+		if err := n.BootstrapNetwork(bootstrapNodes); err != nil {
+			log.Fatal(err)
 		}
-	}()
-
-	grpcServer.Serve(ln)
-
+	}
+	return n
 }
 
 // just for testing
@@ -45,8 +46,9 @@ func makeTransaction() {
 	c := proto.NewNodeClient(client)
 
 	version := &proto.Version{
-		Version: "blockverse-1",
-		Height:  1,
+		Version:    "blockverse-1",
+		Height:     1,
+		ListenAddr: ":4000",
 	}
 
 	_, err = c.Handshake(context.Background(), version)
