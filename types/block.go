@@ -14,7 +14,11 @@ func SignBlock(pk *crypto.PrivateKey, b *proto.Block) *crypto.Signature {
 
 // HashBlock returns sha256 of the header.
 func HashBlock(block *proto.Block) []byte {
-	bytes, err := pb.Marshal(block)
+	return HashHeader(block.Header)
+}
+
+func HashHeader(header *proto.Header) []byte {
+	bytes, err := pb.Marshal(header)
 	if err != nil {
 		panic(err)
 	}
